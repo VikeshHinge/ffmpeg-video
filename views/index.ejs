@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Create a Thumbnail from a Video</title>
@@ -9,21 +10,25 @@
         }
     </style>
 </head>
+
 <body>
     <div>
-        <input id="file-input" type="file" multiple/>
+        <input id="file-input" type="file" multiple />
         <button id="submit">Create Thumbnail</button>
         <div id="error"></div>
         <!-- <img id="thumbnail" /> -->
-        <h3>Upload a mp4 (x264) video  and play!</h3>
-        <video id="thumbnail" controls></video><br/>
+        <h3>Upload a mp4 (x264) video and play!</h3>
+        <video id="thumbnail" controls></video><br />
     </div>
 </body>
+
 </html>
 <script type="module">
-    
-    //    console.log({createFFmpeg})
-       const API_ENDPOINT = 'http://localhost:8085/';
+
+    let url = window.location.href
+       const parsedURL = new URL(url)
+       const API_ENDPOINT = parsedURL.origin;
+       console.log(window.location.host)
 
 const fileInput = document.querySelector('#file-input');
 const submitButton = document.querySelector('#submit');
