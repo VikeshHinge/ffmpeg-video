@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create a Thumbnail from a Video</title>
+    <style>
+        #thumbnail {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <input id="file-input" type="file" multiple/>
+        <button id="submit">Create Thumbnail</button>
+        <div id="error"></div>
+        <!-- <img id="thumbnail" /> -->
+        <h3>Upload a mp4 (x264) video  and play!</h3>
+        <video id="thumbnail" controls></video><br/>
+    </div>
+</body>
+</html>
+<script type="module">
+    
+    //    console.log({createFFmpeg})
+       const API_ENDPOINT = 'http://localhost:8085/';
+
+const fileInput = document.querySelector('#file-input');
+const submitButton = document.querySelector('#submit');
+const thumbnailPreview = document.querySelector('#thumbnail');
+const errorDiv = document.querySelector('#error');
+
+function showError(msg) {
+    errorDiv.innerText = `ERROR: ${msg}`;
+}
+
+async function blobToDataURL(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.onabort = () => reject(new Error("Read aborted"));
+        reader.readAsDataURL(blob);
+    });
+}
+
+async function createThumbnail(video) {
+
+
+    console.log('Video Array:', video);
+
+    const payload = new FormData();
+
+    video.forEach((ele, i) => {
+      if (ele instanceof File) {
+        payload.append(`image`, ele);
+        console.log(`Appended video ${i + 1}`);
+      } else {
+        console.log(`Not a valid File object:`, ele);
+        showError('Not a valid File object');
+      }
+    });
+
+    console.log(video)
+
+    const res = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        body: payload
+    });
+
+    console.log({res})
+
+    if (!res.ok) {
+        throw new Error('Creating thumbnail failed');
+    }
+
+    const thumbnailBlob = await res.blob();
+    const thumbnail = await blobToDataURL(thumbnailBlob);
+
+    return thumbnail;
+}
+
+submitButton.addEventListener('click', async () => {
+    const { files } = fileInput;
+
+    if (files.length > 0) {
+        const file = files[0];
+        console.log(files)
+
+        let Data = [];
+        for(let file of files){
+            Data.push(file)
+        }
+        console.log(Data)
+
+        try {
+            const thumbnail = await createThumbnail(Data);
+            console.log({thumbnail})
+            thumbnailPreview.src = thumbnail;
+        } catch(error) {
+            showError(error);
+        }
+    } else {
+        showError('Please select a file');
+    }
+});
+</script>
